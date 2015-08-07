@@ -5,6 +5,6 @@ carmen_publisher
 
   For more info see:
 
-    [Carmen website](http://carmen.sourceforge.net/home.html)
+    [Carmen website](http://www.carmen.sourceforge.net/home.html).
 
-    [Radish website](http://radish.sourceforge.net/)
+    [Radish website](http://www.radish.sourceforge.net/).
