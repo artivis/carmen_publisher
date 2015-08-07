@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package>
+  <name>carmen_publisher</name>
+  <version>0.0.0</version>
+  <description>a Carmen Log Parser Package</description>
+
+  <maintainer email="jeremie.deray@pal-robotics.com">Jeremie Deray</maintainer>
+
+  <license>BSD</license>
+
+  <author>Jeremie Deray</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>tf2_msgs</run_depend>
+
+</package>
