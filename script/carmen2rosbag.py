@@ -251,38 +251,35 @@ class carmen2rosbag:
 			self.tf2_msg = TFMessage()
 				
 	def fillUpLaserMessage(self, words):
+
+		self.laser_msg.header.frame_id = "base_link"
 		
-		self.laser_msg.header.stamp = self.stamp
-		self.laser_msg.header.frame_id = "lala" #TODO
-		
+		self.laser_msg.angle_increment = float(words[4])
 		self.laser_msg.angle_min = float(words[2])
 		self.laser_msg.angle_max = float(words[2])+float(words[3])
-		self.laser_msg.angle_increment = float(words[4])
-		
-		self.laser_msg.time_increment
-		
-		self.laser_msg.scan_time
-		
+
 		self.laser_msg.range_min = 0.
 		self.laser_msg.range_max = float(words[5])
 				
 		ranges = []
 		num_range_readings = int(words[8])
-		last_range_reading = 9+num_range_readings
-		for word in words[9:last_range_reading]:					
+		last_range_reading = num_range_readings + 8
+
+		for word in words[9:last_range_reading+1]:
 			ranges.append( float( word ))
 			
 		self.laser_msg.ranges = ranges
+
+		ranges = []
+		num_emisison_readings = int(words[last_range_reading+1])
+		last_emission_reading = num_emisison_readings + last_range_reading
 		
-		if size(words) > last_range_reading+1:
-		
-			ranges = []	
-			num_remissions = int(words[last_range_reading+1])
-			last_range_reading = last_range_reading+1+num_range_readings
-			for word in words[(last_range_reading+1):last_range_reading]:					
-				ranges.append( float( word ) )
-					
-			self.laser_msg.intensities = ranges
+		for word in words[last_range_reading+1:last_emission_reading+1]:
+			ranges.append( float( word ))
+
+		self.laser_msg.intensities = ranges
+
+		self.laser_msg.header.stamp = rospy.Time( float(words[last_emission_reading+2]) )
 		
 	def fillUpOldLaserMessage(self, words):
 		
@@ -343,7 +340,7 @@ class carmen2rosbag:
 		
 		self.laser_msg.angle_increment = float(words[4])
 		self.laser_msg.angle_min = float(words[2])
-		self.laser_msg.angle_max = float(words[2])+float(words[3]) - float(words[4])
+		self.laser_msg.angle_max = float(words[2])+float(words[3])
 
 		self.laser_msg.range_min = 0.
 		self.laser_msg.range_max = float(words[5])
