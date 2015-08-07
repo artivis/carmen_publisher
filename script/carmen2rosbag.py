@@ -91,10 +91,20 @@ class carmen2rosbag:
 		
 		robot_link  	  = rospy.get_param("~robot_link", "base_link")
 		odom_link   	  = rospy.get_param("~odom_link", "odom")
+		odom_robot_link	  = rospy.get_param("~odom_robot_link", "odom_robot_link")
 		true_odom_link 	  = rospy.get_param("~trueodom_link", "gt_odom")
 		ROBOTLASER1_link  = rospy.get_param("~ROBOTLASER1_link", "ROBOTLASER1_link")
 		ROBOTLASER2_link  = rospy.get_param("~ROBOTLASER2_link", "ROBOTLASER2_link")
 		
+		# Hacky param to choose which one of ODOM logs or ROBOTLASER1 to publish on tf.
+		# If set to False, ODOM is pub on tf
+		# If set to True,  ROBOTLASER1 is pub on tf
+		# Must be careful, if set to True and there are no ROBOTLASER1 but a ODOM
+		# There won't be anything on tf ...
+		# TODO : - less hacky way
+		#		 - choose which one of ROBOTLASER1 or ROBOTLASER2 etc
+		self.publish_corrected = rospy.get_param("~pub_corrected", False)
+
 		self.topics = {"RAWLASER1" 	 : RAWLASER1_topic,
 					   "RAWLASER2" 	 : RAWLASER2_topic,
 					   "RAWLASER3" 	 : RAWLASER3_topic,
@@ -113,6 +123,7 @@ class carmen2rosbag:
 
 		self.links = {"ROBOT" 		: robot_link,
 					  "ODOM" 		: odom_link,
+					  "ROBOTODOM"	: odom_robot_link,
 					  "TRUEPOS" 	: true_odom_link,
 					  "ROBOTLASER1" : ROBOTLASER1_link,
 					  "ROBOTLASER2" : ROBOTLASER2_link }
@@ -187,22 +198,24 @@ class carmen2rosbag:
 				topic = self.topics[words[0]]
 				self.bag.write(topic, self.laser_msg, self.laser_msg.header.stamp)
 				
-				topic = self.topics["TF"]
-				self.bag.write(topic, self.tf2_msg, self.laser_msg.header.stamp)
-				
-				topic = self.topics["ODOM"]
-				self.bag.write(topic, self.pose_msg, self.pose_msg.header.stamp)
-				
-				self.pose_msg.header.seq  = self.pose_msg.header.seq  + 1
+				if self.publish_corrected:
+					topic = self.topics["TF"]
+					self.bag.write(topic, self.tf2_msg, self.laser_msg.header.stamp)
+
+					topic = self.topics["ODOM"]
+					self.bag.write(topic, self.pose_msg, self.pose_msg.header.stamp)
+
+					self.pose_msg.header.seq  = self.pose_msg.header.seq  + 1
+					self.tf_laser_robot_msg.header.seq = self.tf_laser_robot_msg.header.seq + 1
+					self.tf_odom_robot_msg.header.seq  = self.tf_odom_robot_msg.header.seq  + 1
+
 				self.laser_msg.header.seq = self.laser_msg.header.seq + 1
-				self.tf_laser_robot_msg.header.seq = self.tf_laser_robot_msg.header.seq + 1
-				self.tf_odom_robot_msg.header.seq  = self.tf_odom_robot_msg.header.seq  + 1
 				
 			elif self.ODOM_DEFINED == words[0]:
 				
 				self.fillUpOdomMessage(words)
 				
-				if not self.pose_msg.header.stamp.secs == 0:
+				if not self.pose_msg.header.stamp.secs == 0 and not self.publish_corrected:
 					topic = self.topics["ODOM"]
 					self.bag.write(topic, self.pose_msg, self.pose_msg.header.stamp)
 				
@@ -324,9 +337,9 @@ class carmen2rosbag:
 
 		laser_link = self.links[words[0]]
 		robot_link = self.links["ROBOT"]
-		odom_link  = self.links["ODOM"]
+		odom_link  = self.links["ROBOTODOM"]
 
-		self.laser_msg.header.frame_id = self.links["ROBOT"]#laser_link
+		self.laser_msg.header.frame_id = robot_link #laser_link
 		
 		self.laser_msg.angle_increment = float(words[4])
 		self.laser_msg.angle_min = float(words[2])
