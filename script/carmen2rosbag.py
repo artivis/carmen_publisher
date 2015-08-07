@@ -3,7 +3,13 @@
 
 # Convert Carmen dataset into rosbag
 
-# TODO : missing info to lookup for e.g. laser max_range etc.
+"""
+
+7/08/15
+@author: Jeremie Deray
+carmen2rosbag.py
+
+""".
 
 import rospy
 import roslib
