@@ -379,7 +379,8 @@ class carmen2rosbag:
 		position = Point(float(words[last_range_reading+5]), float(words[last_range_reading+6]), 0.0)
 		quaternion = tf.transformations.quaternion_from_euler(0.0, 0.0, float(words[last_range_reading+7]))
 
-		self.tf_odom_robot_msg.header.stamp = self.laser_msg.header.stamp
+		# tf needs to be publish a little bit in the future
+		self.tf_odom_robot_msg.header.stamp = self.laser_msg.header.stamp + rospy.Duration(0.01)
 
 		self.tf_odom_robot_msg.header.frame_id 	  	 = odom_link
 		self.tf_odom_robot_msg.child_frame_id 		 = robot_link
