@@ -185,9 +185,13 @@ class carmen2rosbag:
 				self.fillUpOldLaserMessage(words)
 				
 				topic = self.topics[words[0]]
-				
+
 				if not self.laser_msg.header.stamp.secs == 0:
 					self.bag.write(topic, self.laser_msg, self.laser_msg.header.stamp)
+
+					if self.publish_corrected:
+						topic = self.topics["TF"]
+						self.bag.write(topic, self.tf2_msg, self.laser_msg.header.stamp)
 				
 					self.laser_msg.header.seq = self.laser_msg.header.seq + 1
 				
@@ -329,6 +333,25 @@ class carmen2rosbag:
 		
 		#TODO : x y theta odom_x odom_y odom_theta
 		#       find out what they are and deal with it
+
+		robot_link = self.links["ROBOT"]
+		odom_link  = self.links["ROBOTODOM"]
+
+		# tf needs to be publish a little bit in the future
+		self.tf_odom_robot_msg.header.stamp = self.laser_msg.header.stamp + rospy.Duration(0.01)
+
+		position = Point(float(words[last_range_reading+4]), float(words[last_range_reading+5]), 0.0)
+		quaternion = tf.transformations.quaternion_from_euler(0.0, 0.0, float(words[last_range_reading+6]))
+
+		self.tf_odom_robot_msg.header.frame_id 	  	 = odom_link
+		self.tf_odom_robot_msg.child_frame_id 		 = robot_link
+		self.tf_odom_robot_msg.transform.translation = position
+		self.tf_odom_robot_msg.transform.rotation.x  = quaternion[0]
+		self.tf_odom_robot_msg.transform.rotation.y  = quaternion[1]
+		self.tf_odom_robot_msg.transform.rotation.z  = quaternion[2]
+		self.tf_odom_robot_msg.transform.rotation.w  = quaternion[3]
+
+		self.tf2_msg.transforms.append(self.tf_odom_robot_msg)
 		
 	def fillUpRobotLaserMessage(self, words):
 
@@ -425,17 +448,18 @@ class carmen2rosbag:
 		# TODO : fill up covariance & twist ?
 		#self.pose_msg.twist.linear  = float(words[4])
 		#self.pose_msg.twist.angular = float(words[5])
-				
-		self.tf_odom_robot_msg.header.stamp 		 = self.pose_msg.header.stamp
-		self.tf_odom_robot_msg.header.frame_id 	  	 = odom_link
-		self.tf_odom_robot_msg.child_frame_id 		 = robot_link
-		self.tf_odom_robot_msg.transform.translation = position
-		self.tf_odom_robot_msg.transform.rotation.x  = quaternion[0]
-		self.tf_odom_robot_msg.transform.rotation.y  = quaternion[1]
-		self.tf_odom_robot_msg.transform.rotation.z  = quaternion[2]
-		self.tf_odom_robot_msg.transform.rotation.w  = quaternion[3]
 
-		self.tf2_msg.transforms.append(self.tf_odom_robot_msg)
+		if not self.publish_corrected:
+			self.tf_odom_robot_msg.header.stamp 		 = self.pose_msg.header.stamp
+			self.tf_odom_robot_msg.header.frame_id 	  	 = odom_link
+			self.tf_odom_robot_msg.child_frame_id 		 = robot_link
+			self.tf_odom_robot_msg.transform.translation = position
+			self.tf_odom_robot_msg.transform.rotation.x  = quaternion[0]
+			self.tf_odom_robot_msg.transform.rotation.y  = quaternion[1]
+			self.tf_odom_robot_msg.transform.rotation.z  = quaternion[2]
+			self.tf_odom_robot_msg.transform.rotation.w  = quaternion[3]
+
+			self.tf2_msg.transforms.append(self.tf_odom_robot_msg)
 		
 	def fillUpTruePoseMessage(self, words):
 		
