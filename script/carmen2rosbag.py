@@ -274,6 +274,16 @@ class carmen2rosbag:
 			
 		self.laser_msg.ranges = ranges
 
+		# min-max angle fitting, Karto need
+		factor_angle_fitting = self.laser_msg.angle_increment / float(2)
+		while (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) != num_range_readings:
+			if (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) > num_range_readings:
+				self.laser_msg.angle_min = self.laser_msg.angle_min + factor_angle_fitting
+			else
+				self.laser_msg.angle_max = self.laser_msg.angle_max - factor_angle_fitting
+
+			factor_angle_fitting = factor_angle_fitting / float(2)
+
 		ranges = []
 		num_emisison_readings = int(words[last_range_reading+1])
 		last_emission_reading = num_emisison_readings + last_range_reading
@@ -299,14 +309,14 @@ class carmen2rosbag:
 		# Get FoV
 		ang_range = self.params["laser"][laser_id+"_fov"]
 		if ang_range is None:
-			ang_range = float( 180 )
+                        ang_range = float( 180 )
 		else:
 			ang_range = radians( float(ang_range) )
 
 		# Get angular resolution
 		ang_res = self.params["laser"][laser_id+"_resolution"]
 		if ang_res is None:
-			ang_res = (ang_range / (num_range_readings - 1.0))
+                        ang_res = (radians(ang_range) / (num_range_readings - 0.0))
 		else:
 			ang_res = radians( float(ang_res) )
 			
@@ -376,6 +386,16 @@ class carmen2rosbag:
 			ranges.append( float( word ))
 
 		self.laser_msg.ranges = ranges
+
+		# min-max angle fitting, Karto need
+		factor_angle_fitting = self.laser_msg.angle_increment / float(2)
+		while (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) != num_range_readings:
+			if (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) > num_range_readings:
+				self.laser_msg.angle_min = self.laser_msg.angle_min + factor_angle_fitting
+			else
+				self.laser_msg.angle_max = self.laser_msg.angle_max - factor_angle_fitting
+
+			factor_angle_fitting = factor_angle_fitting / float(2)
 
 		self.laser_msg.header.stamp = rospy.Time( float(words[last_range_reading+13]) )
 
