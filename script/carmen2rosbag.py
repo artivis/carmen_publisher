@@ -448,6 +448,9 @@ class carmen2rosbag:
 		
 	def fillUpOdomMessage(self, words):
 
+		if float(words[7]) < 0:
+			return
+
 		self.pose_msg.header.stamp = rospy.Time( float(words[7]) )
 
 		position = Point(float(words[1]), float(words[2]), 0.0)
