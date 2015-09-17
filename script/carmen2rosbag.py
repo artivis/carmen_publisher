@@ -264,14 +264,14 @@ class carmen2rosbag:
 
 		self.laser_msg.range_min = 0.
 		self.laser_msg.range_max = float(words[5])
-				
+
 		ranges = []
 		num_range_readings = int(words[8])
 		last_range_reading = num_range_readings + 8
 
 		for word in words[9:last_range_reading+1]:
 			ranges.append( float( word ))
-			
+
 		self.laser_msg.ranges = ranges
 
 		# min-max angle fitting, Karto need
@@ -279,7 +279,7 @@ class carmen2rosbag:
 		while (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) != num_range_readings:
 			if (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) > num_range_readings:
 				self.laser_msg.angle_min = self.laser_msg.angle_min + factor_angle_fitting
-			else
+			else:
 				self.laser_msg.angle_max = self.laser_msg.angle_max - factor_angle_fitting
 
 			factor_angle_fitting = factor_angle_fitting / float(2)
@@ -372,8 +372,8 @@ class carmen2rosbag:
 		self.laser_msg.header.frame_id = robot_link #laser_link
 		
 		self.laser_msg.angle_increment = float(words[4])
-		self.laser_msg.angle_min = float(words[2])
-		self.laser_msg.angle_max = float(words[2])+float(words[3])
+		self.laser_msg.angle_min = float(words[2]) + float(self.laser_msg.angle_increment/2)
+		self.laser_msg.angle_max = float(words[2])+float(words[3]) - float(self.laser_msg.angle_increment/2)
 
 		self.laser_msg.range_min = 0.
 		self.laser_msg.range_max = float(words[5])
@@ -392,7 +392,7 @@ class carmen2rosbag:
 		while (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) != num_range_readings:
 			if (round((self.laser_msg.angle_max - self.laser_msg.angle_min)/self.laser_msg.angle_increment) + 1) > num_range_readings:
 				self.laser_msg.angle_min = self.laser_msg.angle_min + factor_angle_fitting
-			else
+			else:
 				self.laser_msg.angle_max = self.laser_msg.angle_max - factor_angle_fitting
 
 			factor_angle_fitting = factor_angle_fitting / float(2)
