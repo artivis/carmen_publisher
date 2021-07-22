@@ -19,22 +19,20 @@
 # Authors:
 # * Jeremie Deray
 
+import getopt
+import os.path
+import sys
+from math import radians
+
+import carmen_publisher.params as params
+import rosbag
 import rospy
-import roslib
 import tf
-import numpy as np
-import sys, getopt
-from geometry_msgs.msg import Point, Quaternion, TransformStamped
+from geometry_msgs.msg import Point, TransformStamped
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from tf2_msgs.msg import TFMessage
 
-from math import radians, floor
-
-import os.path
-import rosbag
-
-import params
 
 class carmen2rosbag:
 	
